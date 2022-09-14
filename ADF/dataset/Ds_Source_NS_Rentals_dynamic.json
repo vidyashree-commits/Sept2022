@@ -1,0 +1,37 @@
+{
+	"name": "Ds_Source_NS_Rentals_dynamic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_blobdatanalytics",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"datasetFilename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().datasetFilename",
+					"type": "Expression"
+				},
+				"container": "source"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "KWH_CHARGED_TO|Account|NAME|SERV_REGION|ServiceStreetAddress|SERV_CITY|SERV_PROVINCE|SERV_POSTAL_ZIP|ROUTE|Serial_Num|OWN_RENT|TANK_SIZE|PRODUCT_NO|MANUFACTURER|Manf_Code|Product_Class|Prod_Code|INSTALL_DATE|InstalledYear|STATUS_|AcctStatus|STARTDATE|FINAL_PENDING_DATE|END_DATE|INACTIVE_FROM|INACTIVE_TO|LAST_DATE_READ|Last_Bill_Date_Acct|Tran_Count|Account_Bill|Last_Bill_Date|Second_Last_Bill_Date|Third_Last_Bill_Date|Fourth_Last_Bill_Date|Fifth_Last_Bill_Date|Sixth_Last_Bill_Date|Seventh_Last_Bill_Date|First_Bill_Date",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

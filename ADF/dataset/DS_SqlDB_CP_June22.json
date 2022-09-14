@@ -1,0 +1,31 @@
+{
+	"name": "DS_SqlDB_CP_June22",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQL_sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CustomerCode",
+				"type": "varchar"
+			},
+			{
+				"name": "CustomerName",
+				"type": "varchar"
+			},
+			{
+				"name": "ProductCount",
+				"type": "bigint",
+				"precision": 19
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "CP_Jun2022"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,114 @@
+{
+	"name": "DF_Cust_PO",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Storage_oltp_PurchaseOrder",
+						"type": "DatasetReference"
+					},
+					"name": "PurchaseOrder"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_Storage_oltp_Customer",
+						"type": "DatasetReference"
+					},
+					"name": "Customer"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_SqlDB_CP_June22",
+						"type": "DatasetReference"
+					},
+					"name": "Output"
+				}
+			],
+			"transformations": [
+				{
+					"name": "PurchaseOrderProhection"
+				},
+				{
+					"name": "CustomerProjection"
+				},
+				{
+					"name": "QualityCheckPurchaseOrder"
+				},
+				{
+					"name": "JoinCustandPO"
+				},
+				{
+					"name": "MetricCalculation"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          PurchaseOrderID as string,",
+				"          { CustomerCode} as string,",
+				"          { ProductCode} as string,",
+				"          { EmployeeCode} as string,",
+				"          { PurchaseOrderDate} as string,",
+				"          { Quantity} as long,",
+				"          { UnitPrice} as decimal(10,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> PurchaseOrder",
+				"source(output(",
+				"          CustomerCode as string,",
+				"          { CustomerName} as string,",
+				"          { Address} as string,",
+				"          { PhoneNumber} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Customer",
+				"PurchaseOrder select(mapColumn(",
+				"          { CustomerCode},",
+				"          { Quantity}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> PurchaseOrderProhection",
+				"Customer select(mapColumn(",
+				"          CustomerCode,",
+				"          { CustomerName}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> CustomerProjection",
+				"PurchaseOrderProhection filter(greater({ Quantity}, 0)) ~> QualityCheckPurchaseOrder",
+				"QualityCheckPurchaseOrder, CustomerProjection join({ CustomerCode} == CustomerCode,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinCustandPO",
+				"JoinCustandPO aggregate(groupBy(CustomerCode,",
+				"          { CustomerName}),",
+				"     ProductsPurchased = sum({ Quantity})) ~> MetricCalculation",
+				"MetricCalculation sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CustomerCode as string,",
+				"          CustomerName as string,",
+				"          ProductCount as long",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          CustomerCode,",
+				"          CustomerName = { CustomerName},",
+				"          ProductCount = ProductsPurchased",
+				"     )) ~> Output"
+			]
+		}
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"name": "DS_Storage_oltp_Customer",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_blobdatanalytics",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Customer.txt",
+				"container": "oltp"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "CustomerCode",
+				"type": "String"
+			},
+			{
+				"name": " CustomerName",
+				"type": "String"
+			},
+			{
+				"name": " Address",
+				"type": "String"
+			},
+			{
+				"name": " PhoneNumber",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

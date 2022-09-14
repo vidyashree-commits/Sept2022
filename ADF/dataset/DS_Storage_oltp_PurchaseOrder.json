@@ -1,0 +1,53 @@
+{
+	"name": "DS_Storage_oltp_PurchaseOrder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_blobdatanalytics",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "PurchaseOrder.txt",
+				"container": "oltp"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "PurchaseOrderID",
+				"type": "String"
+			},
+			{
+				"name": " CustomerCode",
+				"type": "String"
+			},
+			{
+				"name": " ProductCode",
+				"type": "String"
+			},
+			{
+				"name": " EmployeeCode",
+				"type": "String"
+			},
+			{
+				"name": " PurchaseOrderDate",
+				"type": "String"
+			},
+			{
+				"name": " Quantity",
+				"type": "String"
+			},
+			{
+				"name": " UnitPrice",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

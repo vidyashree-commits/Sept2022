@@ -1,0 +1,53 @@
+{
+	"name": "Transformation1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dataset_Movies",
+						"type": "DatasetReference"
+					},
+					"name": "sourceMovies"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Ds_Target_General",
+						"type": "DatasetReference"
+					},
+					"name": "sinkMovies"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filterDataflow"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Film as string,",
+				"          Genre as string,",
+				"          {Lead Studio} as string,",
+				"          {Audience score %} as string,",
+				"          Profitability as string,",
+				"          {Rotten Tomatoes %} as string,",
+				"          {Worldwide Gross} as string,",
+				"          Year as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceMovies",
+				"sourceMovies filter(toInteger(Year) >= 1910 && toInteger(Year) <= 2000) ~> filterDataflow",
+				"filterDataflow sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['Movies'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkMovies"
+			]
+		}
+	}
+}
