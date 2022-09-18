@@ -480,7 +480,7 @@
 									{
 										"source": {
 											"name": "ORDERED_DATE",
-											"type": "String"
+											"type": "DateTime"
 										},
 										"sink": {
 											"path": "$['ORDERED_DATE']"
