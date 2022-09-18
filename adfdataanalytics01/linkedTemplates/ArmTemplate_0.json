@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfdataanalytics01"
 		},
+		"LS_CosmosDB_datanalytics_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_CosmosDB_datanalytics'"
+		},
 		"LS_SQL_sourcedb_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_SQL_sourcedb'"
@@ -20,6 +24,19 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_CosmosDB_datanalytics')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_CosmosDB_datanalytics_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_SQL_sourcedb')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -45,6 +62,26 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CosmosDbSqlApiCollection1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_CosmosDB_datanalytics",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CosmosDbSqlApiCollection",
+				"schema": {},
+				"typeProperties": {
+					"collectionName": "New_Orders"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_CosmosDB_datanalytics')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_DA_Trgt_Dynamic_fie')]",
@@ -117,6 +154,59 @@
 					"quoteChar": "\""
 				},
 				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_blobdatanalytics')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Forcosmosdborders')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_blobdatanalytics",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Orders.csv",
+						"container": "source"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "PO_NUMBER",
+						"type": "String"
+					},
+					{
+						"name": "AGENCY",
+						"type": "String"
+					},
+					{
+						"name": "COMMODITY",
+						"type": "String"
+					},
+					{
+						"name": "VENDOR_NAME",
+						"type": "String"
+					},
+					{
+						"name": "ORDERED_DATE",
+						"type": "String"
+					},
+					{
+						"name": "PO_AMOUNT",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_blobdatanalytics')]"
@@ -809,13 +899,13 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/PL_cosmosDB_Inserts')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "NS_Rental_source_trgt",
+						"name": "Copy data1",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -839,36 +929,80 @@
 								}
 							},
 							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
+								"type": "CosmosDbSqlApiSink",
+								"writeBehavior": "insert"
 							},
 							"enableStaging": false,
 							"translator": {
 								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
+								"mappings": [
+									{
+										"source": {
+											"name": "PO_NUMBER",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['PO_NUMBER']"
+										}
+									},
+									{
+										"source": {
+											"name": "AGENCY",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['AGENCY']"
+										}
+									},
+									{
+										"source": {
+											"name": "COMMODITY",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['COMMODITY']"
+										}
+									},
+									{
+										"source": {
+											"name": "VENDOR_NAME",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['VENDOR_NAME']"
+										}
+									},
+									{
+										"source": {
+											"name": "ORDERED_DATE",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['ORDERED_DATE']"
+										}
+									},
+									{
+										"source": {
+											"name": "PO_AMOUNT",
+											"type": "String"
+										},
+										"sink": {
+											"path": "$['PO_AMOUNT']"
+										}
+									}
+								]
 							}
 						},
 						"inputs": [
 							{
-								"referenceName": "Ds_Source_NS_Rentals",
+								"referenceName": "DS_Forcosmosdborders",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "Ds_trgt_dataanalytics",
+								"referenceName": "CosmosDbSqlApiCollection1",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -879,241 +1013,11 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
-				"annotations": [],
-				"lastPublishTime": "2022-09-08T03:10:18Z"
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Ds_Source_NS_Rentals')]",
-				"[concat(variables('factoryId'), '/datasets/Ds_trgt_dataanalytics')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DF_Cust_PO')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_Storage_oltp_PurchaseOrder",
-								"type": "DatasetReference"
-							},
-							"name": "PurchaseOrder"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_Storage_oltp_Customer",
-								"type": "DatasetReference"
-							},
-							"name": "Customer"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_SqlDB_CP_June22",
-								"type": "DatasetReference"
-							},
-							"name": "Output"
-						}
-					],
-					"transformations": [
-						{
-							"name": "PurchaseOrderProhection"
-						},
-						{
-							"name": "CustomerProjection"
-						},
-						{
-							"name": "QualityCheckPurchaseOrder"
-						},
-						{
-							"name": "JoinCustandPO"
-						},
-						{
-							"name": "MetricCalculation"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          PurchaseOrderID as string,",
-						"          { CustomerCode} as string,",
-						"          { ProductCode} as string,",
-						"          { EmployeeCode} as string,",
-						"          { PurchaseOrderDate} as string,",
-						"          { Quantity} as long,",
-						"          { UnitPrice} as decimal(10,0)",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> PurchaseOrder",
-						"source(output(",
-						"          CustomerCode as string,",
-						"          { CustomerName} as string,",
-						"          { Address} as string,",
-						"          { PhoneNumber} as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> Customer",
-						"PurchaseOrder select(mapColumn(",
-						"          { CustomerCode},",
-						"          { Quantity}",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> PurchaseOrderProhection",
-						"Customer select(mapColumn(",
-						"          CustomerCode,",
-						"          { CustomerName}",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> CustomerProjection",
-						"PurchaseOrderProhection filter(greater({ Quantity}, 0)) ~> QualityCheckPurchaseOrder",
-						"QualityCheckPurchaseOrder, CustomerProjection join({ CustomerCode} == CustomerCode,",
-						"     joinType:'left',",
-						"     matchType:'exact',",
-						"     ignoreSpaces: false,",
-						"     broadcast: 'auto')~> JoinCustandPO",
-						"JoinCustandPO aggregate(groupBy(CustomerCode,",
-						"          { CustomerName}),",
-						"     ProductsPurchased = sum({ Quantity})) ~> MetricCalculation",
-						"MetricCalculation sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          CustomerCode as string,",
-						"          CustomerName as string,",
-						"          ProductCount as long",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError',",
-						"     mapColumn(",
-						"          CustomerCode,",
-						"          CustomerName = { CustomerName},",
-						"          ProductCount = ProductsPurchased",
-						"     )) ~> Output"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Storage_oltp_PurchaseOrder')]",
-				"[concat(variables('factoryId'), '/datasets/DS_Storage_oltp_Customer')]",
-				"[concat(variables('factoryId'), '/datasets/DS_SqlDB_CP_June22')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Transformation1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "Dataset_Movies",
-								"type": "DatasetReference"
-							},
-							"name": "sourceMovies"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "Ds_Target_General",
-								"type": "DatasetReference"
-							},
-							"name": "sinkMovies"
-						}
-					],
-					"transformations": [
-						{
-							"name": "filterDataflow"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          Film as string,",
-						"          Genre as string,",
-						"          {Lead Studio} as string,",
-						"          {Audience score %} as string,",
-						"          Profitability as string,",
-						"          {Rotten Tomatoes %} as string,",
-						"          {Worldwide Gross} as string,",
-						"          Year as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> sourceMovies",
-						"sourceMovies filter(toInteger(Year) >= 1910 && toInteger(Year) <= 2000) ~> filterDataflow",
-						"filterDataflow sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     partitionFileNames:['Movies'],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> sinkMovies"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Dataset_Movies')]",
-				"[concat(variables('factoryId'), '/datasets/Ds_Target_General')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DF_CustomerPurchaseOrder')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "CustomerPUrchaseOrder",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DF_Cust_PO",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"PurchaseOrder": {},
-									"Customer": {},
-									"Output": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-09-13T03:29:21Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DF_Cust_PO')]"
+				"[concat(variables('factoryId'), '/datasets/DS_Forcosmosdborders')]",
+				"[concat(variables('factoryId'), '/datasets/CosmosDbSqlApiCollection1')]"
 			]
 		}
 	]

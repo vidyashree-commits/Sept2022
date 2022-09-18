@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "adfdataanalytics01"
 		},
+		"LS_CosmosDB_datanalytics_connectionString": {
+			"value": ""
+		},
 		"LS_SQL_sourcedb_connectionString": {
 			"value": ""
 		},

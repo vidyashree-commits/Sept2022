@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfdataanalytics01"
 		},
+		"LS_CosmosDB_datanalytics_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_CosmosDB_datanalytics'"
+		},
 		"LS_SQL_sourcedb_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_SQL_sourcedb'"
@@ -41,6 +45,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LS_CosmosDB_datanalytics_connectionString": {
+						"value": "[parameters('LS_CosmosDB_datanalytics_connectionString')]"
 					},
 					"LS_SQL_sourcedb_connectionString": {
 						"value": "[parameters('LS_SQL_sourcedb_connectionString')]"
