@@ -1,0 +1,110 @@
+{
+	"name": "PL_cosmosDB_Inserts",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "CosmosDbSqlApiSink",
+						"writeBehavior": "insert"
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "PO_NUMBER",
+									"type": "String"
+								},
+								"sink": {
+									"path": "$['PO_NUMBER']"
+								}
+							},
+							{
+								"source": {
+									"name": "AGENCY",
+									"type": "String"
+								},
+								"sink": {
+									"path": "$['AGENCY']"
+								}
+							},
+							{
+								"source": {
+									"name": "COMMODITY",
+									"type": "String"
+								},
+								"sink": {
+									"path": "$['COMMODITY']"
+								}
+							},
+							{
+								"source": {
+									"name": "VENDOR_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"path": "$['VENDOR_NAME']"
+								}
+							},
+							{
+								"source": {
+									"name": "ORDERED_DATE",
+									"type": "String"
+								},
+								"sink": {
+									"path": "$['ORDERED_DATE']"
+								}
+							},
+							{
+								"source": {
+									"name": "PO_AMOUNT",
+									"type": "String"
+								},
+								"sink": {
+									"path": "$['PO_AMOUNT']"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Forcosmosdborders",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CosmosDbSqlApiCollection1",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}

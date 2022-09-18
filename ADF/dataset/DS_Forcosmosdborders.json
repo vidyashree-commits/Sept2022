@@ -1,0 +1,48 @@
+{
+	"name": "DS_Forcosmosdborders",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_blobdatanalytics",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Orders.csv",
+				"container": "source"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "PO_NUMBER",
+				"type": "String"
+			},
+			{
+				"name": "AGENCY",
+				"type": "String"
+			},
+			{
+				"name": "COMMODITY",
+				"type": "String"
+			},
+			{
+				"name": "VENDOR_NAME",
+				"type": "String"
+			},
+			{
+				"name": "ORDERED_DATE",
+				"type": "String"
+			},
+			{
+				"name": "PO_AMOUNT",
+				"type": "String"
+			}
+		]
+	}
+}

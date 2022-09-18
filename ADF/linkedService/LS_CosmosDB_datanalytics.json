@@ -1,0 +1,12 @@
+{
+	"name": "LS_CosmosDB_datanalytics",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "CosmosDb",
+		"typeProperties": {
+			"connectionString": "AccountEndpoint=https://dataanalytics.documents.azure.com:443/;Database=orderdb;",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDc3NzE3QzU0LUMzMzEtNDk4OS1CRDlFLTU0RDY3RTU2NEQ4RV9lYmUxYWUxZC01NjZhLTQ4MWUtYjE3My0xMjJjNjRlZDk2ODkiDQp9"
+		}
+	}
+}
